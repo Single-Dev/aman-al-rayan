@@ -170,6 +170,31 @@ class DatabaseManager:
             )
         ''')
 
+        # Mini App Sessions table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS mini_app_sessions (
+                session_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER UNIQUE NOT NULL,
+                version TEXT DEFAULT 'lite',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users (user_id)
+            )
+        ''')
+
+        # User Preferences table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS user_preferences (
+                preference_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER UNIQUE NOT NULL,
+                preferred_version TEXT DEFAULT 'lite',
+                notifications_enabled BOOLEAN DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users (user_id)
+            )
+        ''')
+
         conn.commit()
         conn.close()
 
@@ -597,14 +622,117 @@ class DatabaseManager:
         """Cancel subscription"""
         conn = self.get_connection()
         cursor = conn.cursor()
-        
+
         cursor.execute('''
-            UPDATE subscriptions 
+            UPDATE subscriptions
             SET status = 'cancelled', end_date = CURRENT_TIMESTAMP
             WHERE subscription_id = ?
         ''', (subscription_id,))
-        
+
         conn.commit()
         affected = cursor.rowcount
         conn.close()
         return affected > 0
+
+    # Mini App Operations
+    def create_mini_app_session(self, user_id: int, version: str = 'lite') -> bool:
+        """Create or update mini app session"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute('''
+                INSERT INTO mini_app_sessions (user_id, version, last_activity)
+                VALUES (?, ?, CURRENT_TIMESTAMP)
+                ON CONFLICT(user_id) DO UPDATE SET
+                    version = excluded.version,
+                    last_activity = CURRENT_TIMESTAMP
+            ''', (user_id, version))
+
+            conn.commit()
+            return True
+        except Exception as e:
+            print(f"Error creating mini app session: {e}")
+            return False
+        finally:
+            conn.close()
+
+    def get_mini_app_session(self, user_id: int) -> Optional[Dict[str, Any]]:
+        """Get mini app session"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute('''
+            SELECT * FROM mini_app_sessions WHERE user_id = ?
+        ''', (user_id,))
+
+        row = cursor.fetchone()
+        conn.close()
+
+        if row:
+            return dict(row)
+        return None
+
+    def set_user_preference(self, user_id: int, preferred_version: str = 'lite') -> bool:
+        """Set or update user preference for mini app version"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute('''
+                INSERT INTO user_preferences (user_id, preferred_version, updated_at)
+                VALUES (?, ?, CURRENT_TIMESTAMP)
+                ON CONFLICT(user_id) DO UPDATE SET
+                    preferred_version = excluded.preferred_version,
+                    updated_at = CURRENT_TIMESTAMP
+            ''', (user_id, preferred_version))
+
+            conn.commit()
+            return True
+        except Exception as e:
+            print(f"Error setting user preference: {e}")
+            return False
+        finally:
+            conn.close()
+
+    def get_user_preference(self, user_id: int) -> Optional[Dict[str, Any]]:
+        """Get user preference for mini app"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute('''
+            SELECT * FROM user_preferences WHERE user_id = ?
+        ''', (user_id,))
+
+        row = cursor.fetchone()
+        conn.close()
+
+        if row:
+            return dict(row)
+        return None
+
+    def get_user_preferred_version(self, user_id: int) -> str:
+        """Get user's preferred mini app version"""
+        preference = self.get_user_preference(user_id)
+        return preference.get('preferred_version', 'lite') if preference else 'lite'
+
+    def save_mini_app_quote(self, user_id: int, service_id: str, date: str, time: Optional[str], price: float) -> bool:
+        """Save a mini app quote (note in order as draft)"""
+        # Quotes are saved as draft orders
+        try:
+            order_id = self.create_order(
+                user_id=user_id,
+                service_type=service_id,
+                hours=1,
+                estimated_price=price,
+                scheduled_date=date
+            )
+
+            # Update with preferred time if provided
+            if time:
+                self.update_order_time(order_id, time)
+
+            return order_id > 0
+        except Exception as e:
+            print(f"Error saving mini app quote: {e}")
+            return False

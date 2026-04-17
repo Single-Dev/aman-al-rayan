@@ -61,6 +61,7 @@ from src.handlers.admin_handler import (
     handle_setbalance_command,
 )
 from src.handlers.navigation_handler import handle_back_to_main, handle_back_to_services
+from src.handlers.mini_app_handler import handle_mini_app_button, handle_web_app_data
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -200,6 +201,9 @@ def main():
         CallbackQueryHandler(handle_back_to_services, pattern=r"^back_to_services$")
     )
     application.add_handler(
+        CallbackQueryHandler(handle_mini_app_button, pattern=r"^mini_app$")
+    )
+    application.add_handler(
         CallbackQueryHandler(
             handle_admin_callback,
             pattern=r"^(admin_|back_to_admin|view_user_|edit_balance_|user_page_).*$"
@@ -218,6 +222,10 @@ def main():
     application.add_handler(
         MessageHandler(filters.LOCATION, handle_location_share)
     )
+    # Handle WebApp data from mini app (FIRST priority)
+    application.add_handler(
+        MessageHandler(filters.StatusUpdate.WEB_APP_DATA, handle_web_app_data)
+    )
     # Handle all other text input (FIRST priority)
     application.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_input)
@@ -233,7 +241,7 @@ def main():
     application.add_error_handler(error_handler)
 
     logger.info("Bot started successfully!")
-    application.run_polling(allowed_updates=["message", "callback_query"])
+    application.run_polling(allowed_updates=["message", "callback_query", "web_app_data"])
 
 
 if __name__ == "__main__":

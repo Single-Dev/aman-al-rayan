@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Booking</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 16px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .content {
+            padding: 20px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .tab-nav {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 20px;
+            background: #f5f5f5;
+            padding: 4px;
+            border-radius: 6px;
+        }
+
+        .tab-btn {
+            padding: 10px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            color: #666;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #667;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .service-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .service-item {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .service-item:hover {
+            border-color: #667eea;
+            background: #f9faff;
+        }
+
+        .service-item.selected {
+            border-color: #667eea;
+            background: #f0f2ff;
+            box-shadow: inset 0 0 0 2px #667eea;
+        }
+
+        .service-name {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .service-desc {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+        }
+
+        .price-range {
+            font-size: 13px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .calendar-wrapper {
+            background: white;
+            border-radius: 8px;
+        }
+
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .time-slot {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .time-slot:hover {
+            border-color: #667eea;
+            background: #f9faff;
+        }
+
+        .time-slot.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .time-slot.unavailable {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background: #f5f5f5;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 6px;
+        }
+
+        input[type="number"],
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        input[type="number"]:focus,
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .summary-card {
+            background: #f9faff;
+            border: 1px solid #e0e8ff;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 6px;
+            color: #666;
+        }
+
+        .summary-row.total {
+            border-top: 1px solid #e0e8ff;
+            padding-top: 8px;
+            margin-top: 8px;
+            color: #667eea;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .deal-panel {
+            background: #fff8f0;
+            border-left: 4px solid #ff9800;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+
+        .deal-title {
+            font-weight: 600;
+            color: #e65100;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary {
+            background: #f0f2ff;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            grid-column: 1 / -1;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error {
+            background: #ffe0e0;
+            border-left: 4px solid #ff6b6b;
+            color: #c92a2a;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            display: none;
+            font-size: 13px;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            display: none;
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .flatpickr-calendar {
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📅 Full Booking</h1>
+            <p>Complete service booking with calendar</p>
+        </div>
+
+        <div class="content">
+            <div id="error" class="error"></div>
+
+            <!-- Tab Navigation -->
+            <div class="tab-nav">
+                <button class="tab-btn active" data-tab="services">1. Service</button>
+                <button class="tab-btn" data-tab="schedule">2. Schedule</button>
+                <button class="tab-btn" data-tab="summary">3. Review</button>
+            </div>
+
+            <!-- Tab 1: Services -->
+            <div class="tab-content active" id="services-tab">
+                <div class="section">
+                    <div class="section-title">Select Service</div>
+                    <div class="service-grid" id="serviceList"></div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Schedule -->
+            <div class="tab-content" id="schedule-tab">
+                <div class="section">
+                    <div class="section-title">Select Date & Time</div>
+                    <div class="input-group">
+                        <label>📅 Preferred Date</label>
+                        <input type="text" id="dateInput" placeholder="Click to select...">
+                    </div>
+                </div>
+
+                <div class="section" id="timeSection" style="display: none;">
+                    <div class="section-title">Select Time Slot</div>
+                    <div class="time-slots" id="timeSlots"></div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Summary & Deal -->
+            <div class="tab-content" id="summary-tab">
+                <div class="section">
+                    <div class="summary-card">
+                        <div class="summary-row">
+                            <span>Service:</span>
+                            <span id="summaryService">-</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Date:</span>
+                            <span id="summaryDate">-</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Time:</span>
+                            <span id="summaryTime">-</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Base Price:</span>
+                            <span id="summaryPrice">-</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Your Price:</span>
+                            <span id="summaryTotal">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="deal-panel">
+                        <div class="deal-title">💰 Propose Your Price</div>
+                        <div class="input-group">
+                            <label>Your Price (AED)</label>
+                            <input type="number" id="proposedPrice" placeholder="Enter your price..." min="50" step="10">
+                        </div>
+                        <div class="input-group">
+                            <label>Additional Notes (Optional)</label>
+                            <textarea id="notes" placeholder="Any special requests?"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-secondary" id="editBtn">← Edit</button>
+                    <button class="btn-primary" id="submitBtn" disabled>✓ Send Booking</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        // Get init data
+        let initData = new URLSearchParams(window.location.search).get('initData');
+        if (!initData && window.initData) {
+            initData = window.initData;
+        }
+
+        let selectedService = null;
+        let selectedDate = null;
+        let selectedTime = null;
+        let quoteData = null;
+
+        // Tab navigation
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                e.target.classList.add('active');
+                document.getElementById(e.target.dataset.tab + '-tab').classList.add('active');
+            });
+        });
+
+        // Load services
+        async function loadServices() {
+            try {
+                const response = await fetch(`/api/v1/services?init_data=${encodeURIComponent(initData)}`);
+                const services = await response.json();
+
+                const serviceList = document.getElementById('serviceList');
+                serviceList.innerHTML = '';
+
+                services.forEach(service => {
+                    const item = document.createElement('div');
+                    item.className = 'service-item';
+                    item.innerHTML = `
+                        <div class="service-name">${service.name}</div>
+                        <div class="service-desc">${service.description}</div>
+                        <div class="price-range">AED 150 - 350/hour</div>
+                    `;
+
+                    item.addEventListener('click', () => {
+                        document.querySelectorAll('.service-item').forEach(el => el.classList.remove('selected'));
+                        item.classList.add('selected');
+                        selectedService = service;
+                        document.getElementById('summaryService').textContent = service.name;
+                    });
+
+                    serviceList.appendChild(item);
+                });
+            } catch (error) {
+                showError('Failed to load services');
+                console.error(error);
+            }
+        }
+
+        // Calendar setup
+        const dateInput = document.getElementById('dateInput');
+        flatpickr(dateInput, {
+            minDate: new Date(),
+            maxDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days ahead
+            onChange: (selectedDates) => {
+                if (selectedDates.length > 0) {
+                    selectedDate = selectedDates[0].toISOString().split('T')[0];
+                    document.getElementById('summaryDate').textContent = formatDate(selectedDate);
+                    loadTimeSlots();
+                    document.getElementById('timeSection').style.display = 'block';
+                }
+            }
+        });
+
+        // Load time slots
+        function loadTimeSlots() {
+            const timeSlots = document.getElementById('timeSlots');
+            timeSlots.innerHTML = '';
+
+            const workingHours = ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
+
+            workingHours.forEach(time => {
+                const slot = document.createElement('div');
+                slot.className = 'time-slot';
+                slot.textContent = time;
+
+                // Random availability for demo (in real app, fetch from server)
+                const available = Math.random() > 0.2;
+
+                if (!available) {
+                    slot.classList.add('unavailable');
+                } else {
+                    slot.addEventListener('click', () => {
+                        document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+                        slot.classList.add('selected');
+                        selectedTime = time;
+                        document.getElementById('summaryTime').textContent = time;
+                    });
+                }
+
+                timeSlots.appendChild(slot);
+            });
+        }
+
+        // Update proposed price
+        document.getElementById('proposedPrice').addEventListener('change', (e) => {
+            const price = e.target.value || '250';
+            document.getElementById('summaryTotal').textContent = `AED ${price}`;
+            document.getElementById('submitBtn').disabled = false;
+        });
+
+        // Edit button
+        document.getElementById('editBtn').addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn')[0].click();
+        });
+
+        // Submit booking
+        document.getElementById('submitBtn').addEventListener('click', async () => {
+            if (!selectedService || !selectedDate) {
+                showError('Please complete all required fields');
+                return;
+            }
+
+            const proposedPrice = parseFloat(document.getElementById('proposedPrice').value) || 250;
+            const notes = document.getElementById('notes').value;
+
+            try {
+                const orderData = {
+                    service_id: selectedService.id,
+                    service_name: selectedService.name,
+                    date: selectedDate,
+                    time: selectedTime || '09:00',
+                    proposed_price: proposedPrice,
+                    notes: notes,
+                    quantity: 1,
+                    version: 'booking'
+                };
+
+                const response = await fetch('/api/v1/submit-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(orderData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.status === 'created') {
+                    showToast('✓ Booking sent! We\'ll review your price proposal.');
+
+                    // Send back to bot
+                    if (window.Telegram && window.Telegram.WebApp) {
+                        window.Telegram.WebApp.sendData(JSON.stringify(orderData));
+                    }
+
+                    // Reset
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showError(result.message || 'Failed to submit booking');
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        });
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr + 'T00:00:00');
+            return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        }
+
+        function showError(message) {
+            const errorEl = document.getElementById('error');
+            errorEl.textContent = message;
+            errorEl.classList.add('show');
+            setTimeout(() => errorEl.classList.remove('show'), 4000);
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Initialize
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
+        }
+
+        loadServices();
+    </script>
+</body>
+</html>

@@ -75,3 +75,25 @@ WEBSITE_ADMIN = {
     'username': 'zet',
     'password': 'zetDXB123'
 }
+
+# Mini App Configuration
+MINI_APP_CONFIG = {
+    'enabled': True,
+    'url': os.getenv('MINI_APP_URL', 'http://localhost:8000'),
+    'port': int(os.getenv('MINI_APP_PORT', '8000')),
+    'api_endpoint': '/api/v1',
+    'supported_versions': ['lite', 'booking'],
+    'default_version': 'lite',
+    'session_timeout': 3600,  # 1 hour
+}
+
+MINI_APP_VERSIONS = {
+    'lite': {
+        'name': 'Lightweight Browser',
+        'features': ['browse', 'quote']
+    },
+    'booking': {
+        'name': 'Full Booking Experience',
+        'features': ['browse', 'quote', 'calendar', 'negotiate']
+    }
+}

@@ -1,0 +1,78 @@
+2026-04-17 04:05:44,144 - __main__ - INFO - Bot started successfully!
+2026-04-17 04:05:44,764 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/getMe "HTTP/1.1 200 OK"
+2026-04-17 04:05:44,929 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/deleteWebhook "HTTP/1.1 200 OK"
+2026-04-17 04:05:44,931 - telegram.ext.Application - INFO - Application started
+2026-04-17 04:05:55,478 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/getUpdates "HTTP/1.1 200 OK"
+2026-04-17 04:06:05,718 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/getUpdates "HTTP/1.1 200 OK"
+2026-04-17 04:06:16,061 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/getUpdates "HTTP/1.1 200 OK"
+2026-04-17 04:06:26,301 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/getUpdates "HTTP/1.1 200 OK"
+2026-04-17 04:06:36,542 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/getUpdates "HTTP/1.1 200 OK"
+2026-04-17 04:06:46,778 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/getUpdates "HTTP/1.1 200 OK"
+2026-04-17 04:06:57,020 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/getUpdates "HTTP/1.1 200 OK"
+2026-04-17 04:07:07,260 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/getUpdates "HTTP/1.1 200 OK"
+2026-04-17 04:07:17,500 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/getUpdates "HTTP/1.1 200 OK"
+2026-04-17 04:07:27,639 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/getUpdates "HTTP/1.1 200 OK"
+2026-04-17 04:07:29,001 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/getUpdates "HTTP/1.1 200 OK"
+2026-04-17 04:07:29,006 - src.handlers.order_handler - INFO - Handling text input: '🧹 Services' from user 5092483247
+2026-04-17 04:07:29,480 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/sendMessage "HTTP/1.1 200 OK"
+2026-04-17 04:07:31,584 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/getUpdates "HTTP/1.1 200 OK"
+2026-04-17 04:07:31,590 - src.handlers.order_handler - INFO - Handling text input: '📲 Mini App' from user 5092483247
+2026-04-17 04:07:31,835 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/sendMessage "HTTP/1.1 400 Bad Request"
+2026-04-17 04:07:31,837 - __main__ - ERROR - Exception while handling update:
+Traceback (most recent call last):
+  File "/home/mint/Desktop/tg-app/tg_bot_env/lib/python3.12/site-packages/telegram/ext/_application.py", line 1124, in process_update
+    await coroutine
+  File "/home/mint/Desktop/tg-app/tg_bot_env/lib/python3.12/site-packages/telegram/ext/_handler.py", line 141, in handle_update
+    return await self.callback(update, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mint/Desktop/tg-app/src/handlers/order_handler.py", line 429, in handle_text_input
+    await handle_mini_app_button(update, context)
+  File "/home/mint/Desktop/tg-app/src/handlers/mini_app_handler.py", line 45, in handle_mini_app_button
+    await update.message.reply_text(message_text, parse_mode='Markdown', reply_markup=keyboard)
+  File "/home/mint/Desktop/tg-app/tg_bot_env/lib/python3.12/site-packages/telegram/_message.py", line 1074, in reply_text
+    return await self.get_bot().send_message(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mint/Desktop/tg-app/tg_bot_env/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 2633, in send_message
+    return await super().send_message(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mint/Desktop/tg-app/tg_bot_env/lib/python3.12/site-packages/telegram/_bot.py", line 381, in decorator
+    result = await func(self, *args, **kwargs)  # skipcq: PYL-E1102
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mint/Desktop/tg-app/tg_bot_env/lib/python3.12/site-packages/telegram/_bot.py", line 807, in send_message
+    return await self._send_message(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mint/Desktop/tg-app/tg_bot_env/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 507, in _send_message
+    result = await super()._send_message(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mint/Desktop/tg-app/tg_bot_env/lib/python3.12/site-packages/telegram/_bot.py", line 559, in _send_message
+    result = await self._post(
+             ^^^^^^^^^^^^^^^^^
+  File "/home/mint/Desktop/tg-app/tg_bot_env/lib/python3.12/site-packages/telegram/_bot.py", line 469, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/mint/Desktop/tg-app/tg_bot_env/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 325, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mint/Desktop/tg-app/tg_bot_env/lib/python3.12/site-packages/telegram/_bot.py", line 497, in _do_post
+    return await request.post(
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/mint/Desktop/tg-app/tg_bot_env/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 168, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mint/Desktop/tg-app/tg_bot_env/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 328, in _request_wrapper
+    raise BadRequest(message)
+telegram.error.BadRequest: Inline keyboard button web app url 'http://localhost:8000/lite?user_id=5092483247' is invalid: only https links are allowed
+2026-04-17 04:07:32,002 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/sendMessage "HTTP/1.1 200 OK"
+2026-04-17 04:07:41,766 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/getUpdates "HTTP/1.1 200 OK"
+2026-04-17 04:07:51,933 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/getUpdates "HTTP/1.1 200 OK"
+2026-04-17 04:08:02,146 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/getUpdates "HTTP/1.1 200 OK"
+2026-04-17 04:08:12,387 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/getUpdates "HTTP/1.1 200 OK"
+2026-04-17 04:08:22,522 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/getUpdates "HTTP/1.1 200 OK"
+2026-04-17 04:08:32,650 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/getUpdates "HTTP/1.1 200 OK"
+2026-04-17 04:08:42,797 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/getUpdates "HTTP/1.1 200 OK"
+2026-04-17 04:08:52,935 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/getUpdates "HTTP/1.1 200 OK"
+2026-04-17 04:09:03,064 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/getUpdates "HTTP/1.1 200 OK"
+2026-04-17 04:09:13,210 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/getUpdates "HTTP/1.1 200 OK"
+2026-04-17 04:09:23,615 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/getUpdates "HTTP/1.1 200 OK"
+2026-04-17 04:09:33,793 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/getUpdates "HTTP/1.1 200 OK"
+2026-04-17 04:09:43,931 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8776444908:AAFgY8ckqIkGpRKKYRxgnlrcysthlv9OXTM/getUpdates "HTTP/1.1 200 OK"
