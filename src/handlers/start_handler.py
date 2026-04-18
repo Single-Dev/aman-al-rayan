@@ -1,9 +1,9 @@
-from telegram import Update
+from telegram import Update, WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from src.database.db_manager import DatabaseManager
 from src.utils.keyboards import get_main_menu_keyboard
 from src.utils.messages import get_welcome_message
-from src.config import ADMIN_IDS
+from src.config import ADMIN_IDS, MINI_APP_URL
 
 
 db = DatabaseManager()
@@ -75,9 +75,23 @@ async def handle_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     welcome_message = get_welcome_message(user.first_name or "Friend")
 
+    # Create keyboard with mini app button
+    keyboard = [
+        [InlineKeyboardButton("📲 Book Service", web_app=WebAppInfo(url=MINI_APP_URL))],
+    ]
+
+    # Add main menu below
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
     await update.message.reply_text(
         welcome_message,
         parse_mode='Markdown',
+        reply_markup=reply_markup
+    )
+
+    # Send main menu as separate message
+    await update.message.reply_text(
+        "Choose an option below:",
         reply_markup=get_main_menu_keyboard()
     )
 

@@ -1,12 +1,11 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton, WebAppInfo
-from src.config import SERVICES, SUBSCRIPTION_PLANS, MINI_APP_CONFIG
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
+from src.config import SERVICES, SUBSCRIPTION_PLANS
 
 def get_main_menu_keyboard() -> ReplyKeyboardMarkup:
     """Get main menu keyboard with navigation buttons"""
     keyboard = [
-        ["🧹 Services", "📲 Mini App"],
-        ["💼 Subscriptions", "🤝 Referral"],
-        ["📞 Contact"]
+        ["🧹 Services", "💼 Subscriptions"],
+        ["📞 Contact", "🤝 Referral"]
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
@@ -147,15 +146,5 @@ def get_yes_no_keyboard(callback_prefix: str) -> InlineKeyboardMarkup:
     buttons = [
         [InlineKeyboardButton("✅ Yes", callback_data=f'{callback_prefix}_yes'),
          InlineKeyboardButton("❌ No", callback_data=f'{callback_prefix}_no')]
-    ]
-    return InlineKeyboardMarkup(buttons)
-
-def get_mini_app_keyboard(user_id: int, version: str = 'lite') -> InlineKeyboardMarkup:
-    """Get mini app launcher keyboard with WebApp button"""
-    mini_app_url = f"{MINI_APP_CONFIG['url']}/{version}?user_id={user_id}"
-
-    buttons = [
-        [InlineKeyboardButton("📲 Open App", web_app=WebAppInfo(url=mini_app_url))],
-        [InlineKeyboardButton("⬅️ Back", callback_data='back_to_main')]
     ]
     return InlineKeyboardMarkup(buttons)

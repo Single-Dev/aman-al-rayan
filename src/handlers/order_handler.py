@@ -424,11 +424,6 @@ async def handle_text_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await handle_referral(update, context)
         return
 
-    if "Mini App" in text:
-        from src.handlers.mini_app_handler import handle_mini_app_button
-        await handle_mini_app_button(update, context)
-        return
-
     # Handle user details collection
     if context.user_data.get('collecting_details'):
         return await handle_user_details_collection(update, context, text)

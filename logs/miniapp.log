@@ -14,3 +14,10 @@ WARNING:  Invalid HTTP request received.
 WARNING:  Invalid HTTP request received.
 INFO:     127.0.0.1:34222 - "GET /lite HTTP/1.1" 200 OK
 INFO:     127.0.0.1:34222 - "GET /api/v1/services?init_data=null HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:37524 - "GET /book HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:37532 - "GET /booking HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37532 - "GET /api/v1/services?init_data=null HTTP/1.1" 401 Unauthorized
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [21179]
