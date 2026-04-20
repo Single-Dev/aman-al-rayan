@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Service Booking</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
             margin: 0;
@@ -108,6 +109,7 @@
 
         input[type="date"],
         input[type="time"],
+        input[type="number"],
         textarea {
             width: 100%;
             padding: 10px;
@@ -119,6 +121,7 @@
 
         input[type="date"]:focus,
         input[type="time"]:focus,
+        input[type="number"]:focus,
         textarea:focus {
             outline: none;
             border-color: #667eea;
@@ -149,7 +152,7 @@
             color: white;
         }
 
-        button:hover {
+        button:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
         }
@@ -195,7 +198,6 @@
             border: 1px solid #667eea;
             padding: 12px;
             border-radius: 6px;
-            text-align: center;
             margin: 12px 0;
         }
 
@@ -206,9 +208,72 @@
         }
 
         .price-display .value {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             color: #667eea;
+        }
+
+        .deal-section {
+            background: #fff8f0;
+            border: 1px solid #ff9800;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 12px 0;
+        }
+
+        .deal-section .title {
+            font-weight: 600;
+            color: #e65100;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .price-slider-container {
+            margin: 10px 0;
+        }
+
+        .price-slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #999;
+            margin-bottom: 4px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+
+        .proposed-price-display {
+            text-align: center;
+            font-weight: 600;
+            color: #667eea;
+            font-size: 16px;
+            margin: 8px 0;
         }
     </style>
 </head>
@@ -245,11 +310,37 @@
                 </div>
             </div>
 
-            <!-- Price -->
+            <!-- Price Display -->
             <div class="section" id="priceSection" style="display: none;">
                 <div class="price-display">
-                    <div class="label">Estimated Price</div>
+                    <div class="label">💰 Base Price Range</div>
                     <div class="value" id="priceDisplay">AED 0</div>
+                </div>
+            </div>
+
+            <!-- Deal Negotiation Panel -->
+            <div class="section" id="dealSection" style="display: none;">
+                <div class="deal-section">
+                    <div class="title">💰 Propose Your Price</div>
+                    
+                    <div class="price-slider-container">
+                        <div class="price-slider-labels">
+                            <span>Min</span>
+                            <span>Drag to set price</span>
+                            <span>Max</span>
+                        </div>
+                        <input 
+                            type="range" 
+                            id="priceSlider" 
+                            min="100" 
+                            max="1000" 
+                            value="300"
+                            step="10"
+                        >
+                        <div class="proposed-price-display">
+                            Your Price: <span id="proposedPriceText">AED 300</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -269,7 +360,22 @@
     </div>
 
     <script>
-        // Services data (matching config)
+        // Initialize Telegram WebApp
+        let tg = null;
+        let isTelegramApp = false;
+
+        // Try to get Telegram WebApp
+        if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
+            tg = window.Telegram.WebApp;
+            isTelegramApp = true;
+            tg.ready();
+            tg.expand();
+            console.log('✅ Telegram WebApp detected');
+        } else {
+            console.log('⚠️ Not running in Telegram - using fallback mode');
+        }
+
+        // Services data
         const SERVICES = {
             'standard_cleaning': {
                 name: '🧹 Standard Cleaning',
@@ -305,7 +411,7 @@
 
         let selectedService = null;
 
-        // Initialize date with today
+        // Initialize date
         const dateInput = document.getElementById('dateInput');
         const today = new Date().toISOString().split('T')[0];
         dateInput.min = today;
@@ -335,6 +441,7 @@
             selectedService = { id, ...service };
             document.getElementById('submitBtn').disabled = false;
             updatePrice();
+            showDealSection();
         }
 
         function updatePrice() {
@@ -343,6 +450,29 @@
                 priceDisplay.textContent = `AED ${selectedService.price_min} - ${selectedService.price_max}`;
                 document.getElementById('priceSection').style.display = 'block';
             }
+        }
+
+        function showDealSection() {
+            if (selectedService) {
+                document.getElementById('dealSection').style.display = 'block';
+                
+                // Update slider range
+                const slider = document.getElementById('priceSlider');
+                slider.min = selectedService.price_min - 50;
+                slider.max = selectedService.price_max + 200;
+                slider.value = (selectedService.price_min + selectedService.price_max) / 2;
+                
+                updateProposedPrice();
+            }
+        }
+
+        // Update proposed price
+        const priceSlider = document.getElementById('priceSlider');
+        priceSlider.addEventListener('input', updateProposedPrice);
+
+        function updateProposedPrice() {
+            const value = parseInt(priceSlider.value);
+            document.getElementById('proposedPriceText').textContent = `AED ${value}`;
         }
 
         // Submit
@@ -355,6 +485,7 @@
             const date = document.getElementById('dateInput').value;
             const time = document.getElementById('timeInput').value || '';
             const notes = document.getElementById('notesInput').value;
+            const proposedPrice = parseInt(document.getElementById('priceSlider').value);
 
             if (!date) {
                 showError('Please select a date');
@@ -368,14 +499,26 @@
                 time: time,
                 price_min: selectedService.price_min,
                 price_max: selectedService.price_max,
+                proposed_price: proposedPrice,
                 notes: notes
             };
 
-            // Send data back to Telegram bot
-            if (window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.sendData(JSON.stringify(orderData));
+            // Send to Telegram bot
+            if (isTelegramApp && tg) {
+                try {
+                    tg.sendData(JSON.stringify(orderData));
+                    showSuccess('✅ Booking sent to bot! Closing...');
+                    // Close after a short delay
+                    setTimeout(() => {
+                        if (tg && tg.close) {
+                            tg.close();
+                        }
+                    }, 1000);
+                } catch (error) {
+                    showError('Error sending data to bot: ' + error.message);
+                }
             } else {
-                showSuccess('Booking sent! (Note: Works only in Telegram)');
+                showSuccess('✅ Booking ready! (You\'re not in Telegram app)');
                 console.log('Order data:', orderData);
             }
         });
@@ -391,13 +534,6 @@
             const successEl = document.getElementById('success');
             successEl.textContent = message;
             successEl.classList.add('show');
-            setTimeout(() => successEl.classList.remove('show'), 4000);
-        }
-
-        // Initialize Telegram WebApp
-        if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.ready();
-            window.Telegram.WebApp.expand();
         }
 
         // Load services on page load

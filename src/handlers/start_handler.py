@@ -77,7 +77,7 @@ async def handle_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Create keyboard with mini app button
     keyboard = [
-        [InlineKeyboardButton("📲 Book Service", web_app=WebAppInfo(url=MINI_APP_URL))],
+        [InlineKeyboardButton("📲 Book Service", web_app=WebAppInfo(url="https://enchanting-profiterole-fa1d2e.netlify.app/"))],
     ]
 
     # Add main menu below
