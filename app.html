@@ -2,542 +2,546 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Service Booking</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Premium Service Booking</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        :root {
+            --primary: #2481cc;
+            --primary-gradient: linear-gradient(135deg, #2481cc 0%, #1a6fb3 100%);
+            --secondary-bg: #f4f7f9;
+            --text-main: #1c1c1e;
+            --text-secondary: #8e8e93;
+            --card-bg: #ffffff;
+            --accent: #ff9500;
+            --success: #34c759;
+            --error: #ff3b30;
+            --border-radius: 20px;
+            --shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+            --input-bg: #f2f2f7;
+            --border-color: rgba(0,0,0,0.05);
+            --safe-area-inset-top: env(safe-area-inset-top);
+            --safe-area-inset-bottom: env(safe-area-inset-bottom);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --secondary-bg: #000000;
+                --text-main: #ffffff;
+                --text-secondary: #98989d;
+                --card-bg: #1c1c1e;
+                --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+                --input-bg: #2c2c2e;
+                --border-color: rgba(255,255,255,0.1);
+            }
+        }
+
+        body.tg-theme {
+            background-color: var(--tg-theme-secondary-bg-color, var(--secondary-bg));
+            color: var(--tg-theme-text-color, var(--text-main));
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--secondary-bg);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding: 0;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
             min-height: 100vh;
-            padding: 16px;
-            color: #333;
+            display: flex;
+            flex-direction: column;
         }
 
         .container {
+            flex: 1;
             max-width: 500px;
             margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            overflow: hidden;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: calc(100px + var(--safe-area-inset-bottom));
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: calc(40px + var(--safe-area-inset-top)) 24px 40px;
+            background: var(--primary-gradient);
             color: white;
-            padding: 20px;
             text-align: center;
+            border-bottom-left-radius: 32px;
+            border-bottom-right-radius: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 30px rgba(36, 129, 204, 0.3);
         }
 
         .header h1 {
-            font-size: 24px;
-            margin-bottom: 5px;
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            letter-spacing: -1px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.85;
+            font-weight: 500;
         }
 
         .content {
-            padding: 20px;
+            padding: 0 20px;
+            flex: 1;
         }
 
         .section {
-            margin-bottom: 20px;
+            margin-bottom: 28px;
+            animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            opacity: 0;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
         .section-title {
             font-size: 14px;
-            font-weight: 600;
-            color: #666;
+            font-weight: 700;
+            color: var(--text-secondary);
             text-transform: uppercase;
-            margin-bottom: 12px;
-            letter-spacing: 0.5px;
+            margin-bottom: 14px;
+            margin-left: 8px;
+            letter-spacing: 1px;
         }
 
+        /* Service Grid */
         .service-list {
             display: grid;
-            gap: 10px;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
         }
 
         .service-card {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 20px 16px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            background: #f9f9f9;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            box-shadow: var(--shadow);
         }
 
-        .service-card:hover {
-            border-color: #667eea;
-            background: #f0f2ff;
-            transform: translateY(-2px);
+        .service-card:active {
+            transform: scale(0.95);
         }
 
         .service-card.selected {
-            border-color: #667eea;
-            background: #f0f2ff;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border: 3px solid var(--primary);
+            background: rgba(36, 129, 204, 0.1);
+            box-shadow: 0 12px 24px rgba(36, 129, 204, 0.2);
+        }
+
+        .service-icon {
+            font-size: 36px;
+            margin-bottom: 12px;
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--input-bg);
+            border-radius: 18px;
+            transition: transform 0.3s;
+        }
+
+        .service-card.selected .service-icon {
+            transform: scale(1.1);
+            background: var(--primary);
+            color: white;
         }
 
         .service-name {
-            font-weight: 600;
+            font-weight: 800;
             font-size: 15px;
+            color: var(--text-main);
             margin-bottom: 4px;
         }
 
         .service-desc {
-            font-size: 13px;
-            color: #999;
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Forms */
+        .card-panel {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
         }
 
         .input-group {
-            margin-bottom: 12px;
+            margin-bottom: 18px;
         }
 
-        .input-group label {
+        .input-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .input-label {
             display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: #666;
-            margin-bottom: 6px;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-main);
+            margin-left: 4px;
         }
 
         input[type="date"],
         input[type="time"],
-        input[type="number"],
         textarea {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
+            padding: 16px;
+            border: 2px solid transparent;
+            border-radius: 16px;
+            font-size: 17px;
             font-family: inherit;
+            background: var(--input-bg);
+            color: var(--text-main);
+            transition: all 0.2s;
+            appearance: none;
+            -webkit-appearance: none;
         }
 
-        input[type="date"]:focus,
-        input[type="time"]:focus,
-        input[type="number"]:focus,
-        textarea:focus {
+        input:focus, textarea:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: var(--primary);
+            background: var(--card-bg);
+            box-shadow: 0 0 0 4px rgba(36, 129, 204, 0.1);
         }
 
         textarea {
-            resize: vertical;
-            min-height: 80px;
+            resize: none;
+            min-height: 120px;
         }
 
-        .button-group {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        button {
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .error {
-            background: #ffe0e0;
-            border-left: 4px solid #ff6b6b;
-            color: #c92a2a;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 16px;
-            display: none;
-            font-size: 13px;
-        }
-
-        .error.show {
-            display: block;
-        }
-
-        .success {
-            background: #e7f5ff;
-            border-left: 4px solid #339af0;
-            color: #1971c2;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 16px;
-            display: none;
-            font-size: 13px;
-        }
-
-        .success.show {
-            display: block;
-        }
-
+        /* Price Interaction */
         .price-display {
-            background: #f0f2ff;
-            border: 1px solid #667eea;
-            padding: 12px;
-            border-radius: 6px;
-            margin: 12px 0;
+            text-align: center;
+            padding: 10px 0;
         }
 
-        .price-display .label {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 4px;
+        .price-value {
+            font-size: 44px;
+            font-weight: 900;
+            color: var(--primary);
+            margin: 5px 0;
+            letter-spacing: -1px;
+            font-variant-numeric: tabular-nums;
         }
 
-        .price-display .value {
-            font-size: 18px;
-            font-weight: 700;
-            color: #667eea;
-        }
-
-        .deal-section {
-            background: #fff8f0;
-            border: 1px solid #ff9800;
-            border-radius: 8px;
-            padding: 12px;
-            margin: 12px 0;
-        }
-
-        .deal-section .title {
-            font-weight: 600;
-            color: #e65100;
-            margin-bottom: 8px;
+        .price-hint {
             font-size: 13px;
-        }
-
-        .price-slider-container {
-            margin: 10px 0;
-        }
-
-        .price-slider-labels {
-            display: flex;
-            justify-content: space-between;
-            font-size: 11px;
-            color: #999;
-            margin-bottom: 4px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 24px;
         }
 
         input[type="range"] {
-            width: 100%;
-            height: 6px;
-            border-radius: 3px;
-            background: #ddd;
-            outline: none;
             -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            background: var(--input-bg);
+            border-radius: 10px;
+            outline: none;
+            margin: 15px 0;
         }
 
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            appearance: none;
-            width: 16px;
-            height: 16px;
+            width: 32px;
+            height: 32px;
+            background: #ffffff;
+            border: 3px solid var(--primary);
             border-radius: 50%;
-            background: #667eea;
             cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
-        input[type="range"]::-moz-range-thumb {
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #667eea;
-            cursor: pointer;
+        /* Footer Action */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 16px 24px calc(24px + var(--safe-area-inset-bottom));
+            background: rgba(var(--footer-bg-rgb, 255, 255, 255), 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border-color);
+            z-index: 1000;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
             border: none;
+            padding: 20px;
+            border-radius: 20px;
+            font-size: 18px;
+            font-weight: 800;
+            width: 100%;
+            box-shadow: 0 10px 25px rgba(36, 129, 204, 0.4);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
-        .proposed-price-display {
+        .btn-primary:active {
+            transform: scale(0.97);
+            filter: brightness(1.1);
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            box-shadow: none;
+            opacity: 0.6;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: calc(10px + var(--safe-area-inset-top));
+            left: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            color: var(--text-main);
+            padding: 18px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            z-index: 2000;
+            transform: translateY(-150%);
+            transition: transform 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            font-weight: 700;
             text-align: center;
-            font-weight: 600;
-            color: #667eea;
-            font-size: 16px;
-            margin: 8px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+        }
+
+        /* iPhone SE Refinements */
+        @media (max-width: 375px) {
+            .header { padding: calc(30px + var(--safe-area-inset-top)) 20px 30px; }
+            .header h1 { font-size: 26px; }
+            .service-list { gap: 12px; }
+            .service-icon { width: 54px; height: 54px; font-size: 30px; }
+            .price-value { font-size: 36px; }
         }
     </style>
 </head>
-<body>
+<body class="tg-theme">
+    <div id="toast" class="toast"></div>
+
     <div class="container">
         <div class="header">
-            <h1>📲 Book Service</h1>
-            <p>Quick and easy booking</p>
+            <h1>Premium Booking</h1>
+            <p>Fast, reliable, professional care</p>
         </div>
 
         <div class="content">
-            <div id="error" class="error"></div>
-            <div id="success" class="success"></div>
-
-            <!-- Service Selection -->
-            <div class="section">
+            <!-- Services Section -->
+            <div class="section" style="animation-delay: 0.1s">
                 <div class="section-title">Select Service</div>
                 <div class="service-list" id="serviceList"></div>
             </div>
 
-            <!-- Date Selection -->
-            <div class="section">
-                <div class="input-group">
-                    <label>📅 Preferred Date</label>
-                    <input type="date" id="dateInput" required>
-                </div>
-            </div>
-
-            <!-- Time Selection -->
-            <div class="section">
-                <div class="input-group">
-                    <label>⏰ Preferred Time (Optional)</label>
-                    <input type="time" id="timeInput">
-                </div>
-            </div>
-
-            <!-- Price Display -->
-            <div class="section" id="priceSection" style="display: none;">
-                <div class="price-display">
-                    <div class="label">💰 Base Price Range</div>
-                    <div class="value" id="priceDisplay">AED 0</div>
-                </div>
-            </div>
-
-            <!-- Deal Negotiation Panel -->
-            <div class="section" id="dealSection" style="display: none;">
-                <div class="deal-section">
-                    <div class="title">💰 Propose Your Price</div>
-                    
-                    <div class="price-slider-container">
-                        <div class="price-slider-labels">
-                            <span>Min</span>
-                            <span>Drag to set price</span>
-                            <span>Max</span>
-                        </div>
-                        <input 
-                            type="range" 
-                            id="priceSlider" 
-                            min="100" 
-                            max="1000" 
-                            value="300"
-                            step="10"
-                        >
-                        <div class="proposed-price-display">
-                            Your Price: <span id="proposedPriceText">AED 300</span>
-                        </div>
+            <!-- Timing Section -->
+            <div class="section" style="animation-delay: 0.2s">
+                <div class="section-title">Schedule</div>
+                <div class="card-panel">
+                    <div class="input-group">
+                        <label class="input-label">📅 Date</label>
+                        <input type="date" id="dateInput" required>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">⏰ Time (Optional)</label>
+                        <input type="time" id="timeInput">
                     </div>
                 </div>
             </div>
 
-            <!-- Notes -->
-            <div class="section">
-                <div class="input-group">
-                    <label>📝 Special Requests (Optional)</label>
-                    <textarea id="notesInput" placeholder="Any special requests or notes..."></textarea>
+            <!-- Price Section -->
+            <div id="priceSection" class="section" style="display: none; animation-delay: 0.3s">
+                <div class="section-title">Your Proposal</div>
+                <div class="card-panel price-display">
+                    <div class="price-value" id="priceValue">AED 0</div>
+                    <div class="price-hint" id="priceHint">Standard: AED 60 - 80</div>
+                    <input type="range" id="priceSlider" min="50" max="1000" step="5">
+                    <p style="font-size: 12px; color: var(--text-secondary); font-weight: 600;">
+                        Slide to offer your preferred price
+                    </p>
                 </div>
             </div>
 
-            <!-- Submit Button -->
-            <div class="button-group">
-                <button id="submitBtn" disabled>✓ Send Booking Request</button>
+            <!-- Notes Section -->
+            <div class="section" style="animation-delay: 0.4s">
+                <div class="section-title">Special Requests</div>
+                <div class="card-panel">
+                    <textarea id="notesInput" placeholder="Tell us about any specific details, pets, or special instructions for our team..."></textarea>
+                </div>
             </div>
+        </div>
+
+        <div class="footer">
+            <button id="submitBtn" class="btn-primary" disabled>
+                <span>Confirm Booking</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
+            </button>
         </div>
     </div>
 
     <script>
-        // Initialize Telegram WebApp
-        let tg = null;
-        let isTelegramApp = false;
+        const tg = window.Telegram.WebApp;
+        
+        // Full screen and expansion
+        tg.expand();
+        if (tg.requestFullscreen) tg.requestFullscreen();
+        if (tg.enableClosingConfirmation) tg.enableClosingConfirmation();
+        tg.ready();
 
-        // Try to get Telegram WebApp
-        if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
-            tg = window.Telegram.WebApp;
-            isTelegramApp = true;
-            tg.ready();
-            tg.expand();
-            console.log('✅ Telegram WebApp detected');
-        } else {
-            console.log('⚠️ Not running in Telegram - using fallback mode');
+        // Theme management
+        function applyTheme() {
+            const isDark = tg.colorScheme === 'dark';
+            document.documentElement.style.setProperty('--footer-bg-rgb', isDark ? '28, 28, 30' : '255, 255, 255');
+            if (tg.setHeaderColor) tg.setHeaderColor(isDark ? '#000000' : '#2481cc');
+            if (tg.setBackgroundColor) tg.setBackgroundColor(isDark ? '#000000' : '#f4f7f9');
         }
+        tg.onEvent('themeChanged', applyTheme);
+        applyTheme();
 
-        // Services data
         const SERVICES = {
-            'standard_cleaning': {
-                name: '🧹 Standard Cleaning',
-                description: 'Regular weekly or bi-weekly cleaning for your home',
-                price_min: 180,
-                price_max: 200
-            },
-            'deep_cleaning': {
-                name: '✨ Deep Cleaning',
-                description: 'Thorough deep cleaning service for all surfaces',
-                price_min: 220,
-                price_max: 280
-            },
-            'office_cleaning': {
-                name: '🏢 Office Cleaning',
-                description: 'Professional office and commercial space cleaning',
-                price_min: 250,
-                price_max: 350
-            },
-            'mosque_cleaning': {
-                name: '🕌 Mosque Cleaning',
-                description: 'Specialized mosque and religious space cleaning',
-                price_min: 300,
-                price_max: 400
-            },
-            'move_in_out': {
-                name: '📦 Move-In/Move-Out',
-                description: 'Complete cleaning for moving in or out',
-                price_min: 400,
-                price_max: 600
-            }
+            'standard_cleaning': { icon: '🧹', name: 'Standard', desc: 'Home Care', min: 60, max: 80 },
+            'deep_cleaning': { icon: '✨', name: 'Deep Clean', desc: `'Intensive', min: 120, max: 200 },
+            'office_cleaning': { icon: '🏢', name: 'Office', desc: 'Business', min: 150, max: 300 },
+            'move_in_out': { icon: '📦', name: 'Move In/Out', desc: 'Vacant', min: 250, max: 500 }
         };
 
-        let selectedService = null;
+        let selectedId = null;
 
-        // Initialize date
         const dateInput = document.getElementById('dateInput');
         const today = new Date().toISOString().split('T')[0];
         dateInput.min = today;
         dateInput.value = today;
 
-        // Load services
-        function loadServices() {
-            const serviceList = document.getElementById('serviceList');
-            serviceList.innerHTML = '';
-
-            Object.entries(SERVICES).forEach(([id, service]) => {
+        function init() {
+            const list = document.getElementById('serviceList');
+            Object.entries(SERVICES).forEach(([id, s]) => {
                 const card = document.createElement('div');
                 card.className = 'service-card';
                 card.innerHTML = `
-                    <div class="service-name">${service.name}</div>
-                    <div class="service-desc">${service.description}</div>
+                    <div class="service-icon">${s.icon}</div>
+                    <div class="service-name">${s.name}</div>
+                    <div class="service-desc">${s.desc}</div>
                 `;
-
-                card.addEventListener('click', () => selectService(id, service, card));
-                serviceList.appendChild(card);
+                card.onclick = () => select(id, card);
+                list.appendChild(card);
             });
         }
 
-        function selectService(id, service, element) {
-            document.querySelectorAll('.service-card').forEach(el => el.classList.remove('selected'));
-            element.classList.add('selected');
-            selectedService = { id, ...service };
+        function select(id, el) {
+            document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedId = id;
+            
+            const s = SERVICES[id];
+            const section = document.getElementById('priceSection');
+            const slider = document.getElementById('priceSlider');
+            
+            section.style.display = 'block';
+            slider.min = Math.max(30, s.min - 30);
+            slider.max = s.max + 250;
+            slider.value = s.min;
+            
+            updatePriceUI(s.min, s.min, s.max);
             document.getElementById('submitBtn').disabled = false;
-            updatePrice();
-            showDealSection();
+            
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            
+            // Scroll to price section
+            setTimeout(() => section.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
         }
 
-        function updatePrice() {
-            if (selectedService) {
-                const priceDisplay = document.getElementById('priceDisplay');
-                priceDisplay.textContent = `AED ${selectedService.price_min} - ${selectedService.price_max}`;
-                document.getElementById('priceSection').style.display = 'block';
-            }
+        function updatePriceUI(val, min, max) {
+            document.getElementById('priceValue').innerText = `AED ${val}`;
+            document.getElementById('priceHint').innerText = `Standard Range: AED ${min} - ${max}`;
         }
 
-        function showDealSection() {
-            if (selectedService) {
-                document.getElementById('dealSection').style.display = 'block';
-                
-                // Update slider range
-                const slider = document.getElementById('priceSlider');
-                slider.min = selectedService.price_min - 50;
-                slider.max = selectedService.price_max + 200;
-                slider.value = (selectedService.price_min + selectedService.price_max) / 2;
-                
-                updateProposedPrice();
-            }
+        document.getElementById('priceSlider').oninput = function() {
+            const s = SERVICES[selectedId];
+            updatePriceUI(this.value, s.min, s.max);
+            if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+        };
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
         }
 
-        // Update proposed price
-        const priceSlider = document.getElementById('priceSlider');
-        priceSlider.addEventListener('input', updateProposedPrice);
-
-        function updateProposedPrice() {
-            const value = parseInt(priceSlider.value);
-            document.getElementById('proposedPriceText').textContent = `AED ${value}`;
-        }
-
-        // Submit
-        document.getElementById('submitBtn').addEventListener('click', async () => {
-            if (!selectedService) {
-                showError('Please select a service');
-                return;
-            }
-
-            const date = document.getElementById('dateInput').value;
-            const time = document.getElementById('timeInput').value || '';
-            const notes = document.getElementById('notesInput').value;
-            const proposedPrice = parseInt(document.getElementById('priceSlider').value);
-
-            if (!date) {
-                showError('Please select a date');
-                return;
-            }
-
-            const orderData = {
-                service_id: selectedService.id,
-                service_name: selectedService.name,
-                date: date,
-                time: time,
-                price_min: selectedService.price_min,
-                price_max: selectedService.price_max,
-                proposed_price: proposedPrice,
-                notes: notes
+        document.getElementById('submitBtn').onclick = function() {
+            const s = SERVICES[selectedId];
+            const data = {
+                service_id: selectedId,
+                service_name: s.name,
+                date: dateInput.value,
+                time: document.getElementById('timeInput').value,
+                proposed_price: parseInt(document.getElementById('priceSlider').value),
+                price_min: s.min,
+                price_max: s.max,
+                notes: document.getElementById('notesInput').value
             };
 
-            // Send to Telegram bot
-            if (isTelegramApp && tg) {
+            this.disabled = true;
+            this.innerText = 'Sending...';
+
+            if (tg.sendData) {
                 try {
-                    tg.sendData(JSON.stringify(orderData));
-                    showSuccess('✅ Booking sent to bot! Closing...');
-                    // Close after a short delay
-                    setTimeout(() => {
-                        if (tg && tg.close) {
-                            tg.close();
-                        }
-                    }, 1000);
-                } catch (error) {
-                    showError('Error sending data to bot: ' + error.message);
+                    tg.sendData(JSON.stringify(data));
+                    showToast('✅ Booking Request Sent!');
+                    setTimeout(() => tg.close(), 1000);
+                } catch (e) {
+                    showToast('❌ Error sending data');
+                    this.disabled = false;
+                    this.innerText = 'Confirm Booking';
                 }
             } else {
-                showSuccess('✅ Booking ready! (You\'re not in Telegram app)');
-                console.log('Order data:', orderData);
+                console.log('Demo Mode:', data);
+                showToast('Success (Demo Mode)');
+                setTimeout(() => { this.disabled = false; this.innerText = 'Confirm Booking'; }, 2000);
             }
-        });
+        };
 
-        function showError(message) {
-            const errorEl = document.getElementById('error');
-            errorEl.textContent = message;
-            errorEl.classList.add('show');
-            setTimeout(() => errorEl.classList.remove('show'), 4000);
-        }
-
-        function showSuccess(message) {
-            const successEl = document.getElementById('success');
-            successEl.textContent = message;
-            successEl.classList.add('show');
-        }
-
-        // Load services on page load
-        loadServices();
+        init();
     </script>
 </body>
 </html>

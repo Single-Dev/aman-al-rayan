@@ -1,9 +1,11 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton, WebAppInfo
 from src.config import SERVICES, SUBSCRIPTION_PLANS
 
 def get_main_menu_keyboard() -> ReplyKeyboardMarkup:
     """Get main menu keyboard with navigation buttons"""
+    from src.config import MINI_APP_URL
     keyboard = [
+        [KeyboardButton("📲 Book Service", web_app=WebAppInfo(url=MINI_APP_URL))],
         ["🧹 Services", "💼 Subscriptions"],
         ["📞 Contact", "🤝 Referral"]
     ]

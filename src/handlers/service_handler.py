@@ -255,7 +255,7 @@ async def send_deal_to_admin(order_id: int, deal_id: int, bot):
 • Proposed Price: AED {latest_deal['proposed_price']}
 
 👤 **Customer Contact Information:**
-• User ID: {order['user_id']}
+• User ID: `{order['user_id']}`
 • Name: {customer.get('first_name', 'N/A')} {customer.get('last_name', 'N/A')}
 • Username: @{customer.get('username', 'N/A')}
 • Phone: {customer.get('phone_number', 'N/A')}
@@ -323,10 +323,40 @@ async def handle_admin_deal_action(update: Update, context: ContextTypes.DEFAULT
         if order_user and order_user.get('referrer_id'):
             reward = db.add_referral_earning(order_user['referrer_id'], order_user['user_id'], order_id, latest_deal['proposed_price'])
             if reward:
-                await update.get_bot().send_message(
-                    chat_id=order_user['referrer_id'],
-                    text=f"💰 You earned AED {reward:.2f} from a referred client's confirmed deal!"
-                )
+                referrer = db.get_user(order_user['referrer_id'])
+                # Notify Referrer
+                try:
+                    await update.get_bot().send_message(
+                        chat_id=order_user['referrer_id'],
+                        text=(
+                            f"💰 **You earned AED {reward:.2f}!**\n\n"
+                            f"Your referred client {order_user.get('first_name', 'Friend')} just confirmed a booking.\n"
+                            f"The reward has been added to your balance."
+                        ),
+                        parse_mode='Markdown'
+                    )
+                except Exception:
+                    pass
+                
+                # Notify Admin about the transaction
+                from src.config import ADMIN_IDS
+                for admin_id in ADMIN_IDS:
+                    try:
+                        admin_ref_msg = (
+                            "💸 **Referral Reward Issued**\n\n"
+                            f"👤 **From User:** {order_user.get('first_name')} (@{order_user.get('username', 'N/A')})\n"
+                            f"🆔 User ID: `{order_user.get('user_id')}`\n"
+                            f"🔗 **To Referrer:** {referrer.get('first_name')} (@{referrer.get('username', 'N/A')})\n"
+                            f"🆔 Referrer ID: `{order_user.get('referrer_id')}`\n"
+                            f"📦 **Order ID:** #{order_id}\n"
+                            f"💰 **Deal Amount:** AED {latest_deal['proposed_price']}\n"
+                            f"🎁 **Reward Amount:** AED {reward:.2f}\n"
+                            "───────────────────\n"
+                            "Status: Balance Updated ✅"
+                        )
+                        await update.get_bot().send_message(chat_id=int(admin_id), text=admin_ref_msg, parse_mode='Markdown')
+                    except Exception:
+                        pass
 
         # Prepare customer contact details for admin confirmation
         customer_details = f"""
@@ -425,10 +455,38 @@ async def handle_user_deal_response(update: Update, context: ContextTypes.DEFAUL
         if order_user and order_user.get('referrer_id'):
             reward = db.add_referral_earning(order_user['referrer_id'], order_user['user_id'], order_id, latest_deal['proposed_price'])
             if reward:
-                await update.get_bot().send_message(
-                    chat_id=order_user['referrer_id'],
-                    text=f"💰 You earned AED {reward:.2f} from a referred client's confirmed deal!"
-                )
+                referrer = db.get_user(order_user['referrer_id'])
+                # Notify Referrer
+                try:
+                    await update.get_bot().send_message(
+                        chat_id=order_user['referrer_id'],
+                        text=(
+                            f"💰 **You earned AED {reward:.2f}!**\n\n"
+                            f"Your referred client {order_user.get('first_name', 'Friend')} just confirmed a booking.\n"
+                            f"The reward has been added to your balance."
+                        ),
+                        parse_mode='Markdown'
+                    )
+                except Exception:
+                    pass
+                
+                # Notify Admin about the transaction
+                from src.config import ADMIN_IDS
+                for admin_id in ADMIN_IDS:
+                    try:
+                        admin_ref_msg = (
+                            "💸 **Referral Reward Issued (User Accepted)**\n\n"
+                            f"👤 **From User:** {order_user.get('first_name')} (@{order_user.get('username', 'N/A')})\n"
+                            f"🔗 **To Referrer:** {referrer.get('first_name')} (@{referrer.get('username', 'N/A')})\n"
+                            f"📦 **Order ID:** #{order_id}\n"
+                            f"💰 **Deal Amount:** AED {latest_deal['proposed_price']}\n"
+                            f"🎁 **Reward Amount:** AED {reward:.2f}\n"
+                            "───────────────────\n"
+                            "Status: Balance Updated ✅"
+                        )
+                        await update.get_bot().send_message(chat_id=int(admin_id), text=admin_ref_msg, parse_mode='Markdown')
+                    except Exception:
+                        pass
 
         await query.edit_message_text(text="✅ You accepted the deal. Admin has been notified.")
         if ADMIN_IDS:

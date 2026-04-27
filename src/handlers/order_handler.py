@@ -288,6 +288,7 @@ async def handle_location_share(update: Update, context: ContextTypes.DEFAULT_TY
     """Handle shared location from the user"""
     location = update.message.location
     user = update.effective_user
+    order_id = context.user_data.get('current_order_id')
 
     if location:
         location_text = f"📍 Location: {location.latitude}, {location.longitude}"
@@ -297,11 +298,13 @@ async def handle_location_share(update: Update, context: ContextTypes.DEFAULT_TY
         
         # Forward location to admin
         from src.config import ADMIN_IDS
+        order_text = f"\n📦 **Order ID:** #{order_id}" if order_id else ""
+        
         for admin_id in ADMIN_IDS:
             try:
                 await update.get_bot().send_message(
                     chat_id=int(admin_id),
-                    text=f"📍 **Location received from customer**\n\n👤 {user.first_name} {user.last_name or ''}\n📱 @{user.username or 'N/A'}\n\n{location_text}",
+                    text=f"📍 **Location received from customer**\n\n👤 {user.first_name} {user.last_name or ''}\n📱 @{user.username or 'N/A'}\n🆔 User ID: `{user.id}`{order_text}\n\n{location_text}",
                     parse_mode='Markdown'
                 )
                 await update.get_bot().send_location(
@@ -559,6 +562,7 @@ async def send_admin_notification(order: dict, user: dict, bot):
 👤 **Customer Information:**
 • Name: {user.get('first_name', 'N/A')} {user.get('last_name', 'N/A')}
 • Username: @{user.get('username', 'N/A')}
+• User ID: `{user.get('user_id', 'N/A')}`
 • Phone: {user.get('phone_number', 'N/A')}
 • Email: {user.get('email', 'N/A')}
 • Address: {user.get('address', 'N/A')}

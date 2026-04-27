@@ -238,7 +238,7 @@ def main():
     application.add_error_handler(error_handler)
 
     logger.info("Bot started successfully!")
-    application.run_polling(allowed_updates=["message", "callback_query", "web_app_data"])
+    application.run_polling(allowed_updates=["message", "callback_query"])
 
 
 if __name__ == "__main__":

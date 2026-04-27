@@ -171,6 +171,7 @@ async def send_subscription_to_admin(subscription_id: int, plan: dict, user: dic
 👤 **Customer Information:**
 • Name: {user.get('first_name', 'N/A')} {user.get('last_name', 'N/A')}
 • Username: @{user.get('username', 'N/A')}
+• User ID: `{user.get('user_id', 'N/A')}`
 • Phone: {user.get('phone_number', 'N/A')}
 • Email: {user.get('email', 'N/A')}
 • Address: {user.get('address', 'N/A')}

@@ -10,30 +10,44 @@ db = DatabaseManager()
 
 async def send_referral_notifications(new_user: dict, referrer: dict, bot):
     """Notify admin and referrer when a new client joins by referral."""
-    referrer_username = f"@{referrer.get('username')}" if referrer.get('username') else f"User ID {referrer.get('user_id')}"
-    new_user_tag = f"@{new_user.get('username')}" if new_user.get('username') else f"User ID {new_user.get('user_id')}"
+    referrer_name = f"{referrer.get('first_name') or ''} {referrer.get('last_name') or ''}".strip() or "Unknown"
+    referrer_tag = f"@{referrer.get('username')}" if referrer.get('username') else f"ID: {referrer.get('user_id')}"
+    
+    new_user_name = f"{new_user.get('first_name') or ''} {new_user.get('last_name') or ''}".strip() or "Unknown"
+    new_user_tag = f"@{new_user.get('username')}" if new_user.get('username') else f"ID: {new_user.get('user_id')}"
 
     invitation_message = (
-        "🎉 A new client joined using your referral code!\n\n"
-        f"• Client: {new_user_tag}\n"
-        f"• Client ID: {new_user.get('user_id')}\n"
-        "• Referral Reward: 20% of their confirmed deal amount\n\n"
-        "We will notify you when they make a confirmed deal."
+        "🎉 **New Referral Signup!**\n\n"
+        f"👤 **New Client:** {new_user_name} ({new_user_tag})\n"
+        f"🤝 **Invited By:** {referrer_name} ({referrer_tag})\n"
+        "💰 **Potential Reward:** 20% of their first confirmed deal\n\n"
+        "We will notify you when they complete a booking!"
     )
 
-    await bot.send_message(chat_id=referrer['user_id'], text=invitation_message)
+    # Notify Referrer
+    try:
+        await bot.send_message(chat_id=referrer['user_id'], text=invitation_message, parse_mode='Markdown')
+    except Exception:
+        pass
 
+    # Notify Admin
     if ADMIN_IDS:
         admin_message = (
-            "📣 New referral signup!\n\n"
-            f"• New client: {new_user_tag} (ID: {new_user.get('user_id')})\n"
-            f"• Referred by: {referrer_username} (ID: {referrer.get('user_id')})\n"
-            "• Reward: 20% of confirmed deal value\n"
+            "🚀 **Detailed Referral Notification**\n\n"
+            "📈 **Signup Event**\n"
+            f"• **New User:** {new_user_name}\n"
+            f"• **User ID:** `{new_user.get('user_id')}`\n"
+            f"• **Username:** {new_user_tag}\n\n"
+            f"🔗 **Referrer:** {referrer_name}\n"
+            f"• **Referrer ID:** `{referrer.get('user_id')}`\n"
+            f"• **Referrer Username:** {referrer_tag}\n"
+            "───────────────────\n"
+            "Status: Awaiting first booking..."
         )
 
         for admin_id in ADMIN_IDS:
             try:
-                await bot.send_message(chat_id=int(admin_id), text=admin_message)
+                await bot.send_message(chat_id=int(admin_id), text=admin_message, parse_mode='Markdown')
             except Exception:
                 pass
 
@@ -75,23 +89,13 @@ async def handle_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     welcome_message = get_welcome_message(user.first_name or "Friend")
 
-    # Create keyboard with mini app button
-    keyboard = [
-        [InlineKeyboardButton("📲 Book Service", web_app=WebAppInfo(url="https://enchanting-profiterole-fa1d2e.netlify.app/"))],
-    ]
-
-    # Add main menu below
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
+    # Use MINI_APP_URL from config
+    from src.config import MINI_APP_URL
+    
+    # Send welcome message with main menu keyboard
     await update.message.reply_text(
         welcome_message,
         parse_mode='Markdown',
-        reply_markup=reply_markup
-    )
-
-    # Send main menu as separate message
-    await update.message.reply_text(
-        "Choose an option below:",
         reply_markup=get_main_menu_keyboard()
     )
 

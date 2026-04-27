@@ -16,7 +16,8 @@ async def handle_admin_command(update: Update, context: ContextTypes.DEFAULT_TYP
         return
 
     keyboard = [
-        [InlineKeyboardButton("💰 Change User Balance (Beta)", callback_data="admin_manage_balances")],
+        [InlineKeyboardButton("👥 View All Users", callback_data="admin_view_users")],
+        [InlineKeyboardButton("💰 Change User Balance", callback_data="admin_manage_balances")],
         [InlineKeyboardButton("📊 Statistics", callback_data="admin_statistics")],
         [InlineKeyboardButton("🔙 Back to Main", callback_data="back_to_main")]
     ]
@@ -234,7 +235,24 @@ async def show_user_details(query, context, user_id):
     text += f"**Total Deals:** {stats['total_deals']}\n"
     text += f"**Total Earnings:** AED {stats['total_earnings']:.2f}\n"
     text += f"**Total Deal Value:** AED {stats['total_deal_value']:.2f}\n"
-    text += f"**Joined:** {stats['created_at']}\n"
+    text += f"**Joined:** {stats['created_at']}\n\n"
+
+    if stats.get('referred_users'):
+        text += "🤝 **Users Invited:**\n"
+        for ref_user in stats['referred_users'][:10]:  # Show last 10
+            ref_name = ref_user['username'] or ref_user['first_name']
+            text += f"• {ref_name} (ID: `{ref_user['user_id']}`)\n"
+        if len(stats['referred_users']) > 10:
+            text += f"• _...and {len(stats['referred_users']) - 10} more_\n"
+        text += "\n"
+
+    if stats.get('earnings_history'):
+        text += "💰 **Earnings History:**\n"
+        for earn in stats['earnings_history'][:10]:  # Show last 10
+            text += f"• AED {earn['reward_amount']:.2f} from {earn['referred_name']}\n"
+        if len(stats['earnings_history']) > 10:
+            text += f"• _...and {len(stats['earnings_history']) - 10} more_\n"
+        text += "\n"
 
     keyboard = [
         [InlineKeyboardButton("💰 Edit Balance", callback_data=f"edit_balance_{user_id}")],

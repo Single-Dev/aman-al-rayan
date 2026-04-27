@@ -332,6 +332,25 @@ class DatabaseManager:
         ''', (user_id,))
         
         earnings_row = cursor.fetchone()
+
+        # Get list of referred users
+        cursor.execute('''
+            SELECT user_id, first_name, username, created_at 
+            FROM users 
+            WHERE referrer_id = ?
+            ORDER BY created_at DESC
+        ''', (user_id,))
+        referred_users = [dict(row) for row in cursor.fetchall()]
+
+        # Get list of earnings with details
+        cursor.execute('''
+            SELECT e.*, u.first_name as referred_name, u.username as referred_username
+            FROM referral_earnings e
+            JOIN users u ON e.referred_user_id = u.user_id
+            WHERE e.user_id = ?
+            ORDER BY e.created_at DESC
+        ''', (user_id,))
+        earnings_history = [dict(row) for row in cursor.fetchall()]
         
         conn.close()
 
@@ -340,14 +359,14 @@ class DatabaseManager:
             'username': user.get('username'),
             'first_name': user.get('first_name'),
             'last_name': user.get('last_name'),
-            'phone_number': user.get('phone_number'),
-            'email': user.get('email'),
             'referral_code': user.get('referral_code'),
             'referral_balance': user.get('referral_balance') or 0.0,
             'referral_joins': user.get('referral_joins') or 0,
             'total_deals': earnings_row['total_deals'] if earnings_row else 0,
             'total_earnings': earnings_row['total_earnings'] if earnings_row else 0.0,
             'total_deal_value': earnings_row['total_deal_value'] if earnings_row else 0.0,
+            'referred_users': referred_users,
+            'earnings_history': earnings_history,
             'created_at': user.get('created_at')
         }
 
